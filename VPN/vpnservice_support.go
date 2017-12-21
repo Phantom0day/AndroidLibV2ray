@@ -1,4 +1,4 @@
-package libv2ray
+package VPN
 
 import (
 	"errors"
@@ -9,14 +9,26 @@ import (
 
 	"golang.org/x/sys/unix"
 )
+import "github.com/davecgh/go-spew/spew"
 
 type vpnProtectedDialer struct {
-	vp *V2RayPoint
+	vp *VPNSupport
 }
 
 func (sDialer *vpnProtectedDialer) Dial(network, Address string) (net.Conn, error) {
 	if strings.HasPrefix(network, "tcp") {
-		addr, err := net.ResolveTCPAddr(network, Address)
+
+		var addr *net.TCPAddr
+		var err error
+
+		addr, haveaddr := sDialer.vp.prepareddomain.tcpprepared[Address]
+
+		if haveaddr == false {
+			addr, err = net.ResolveTCPAddr(network, Address)
+		} else {
+			log.Println("Using Prepared Domain Name: TCP,", Address)
+		}
+
 		if err != nil {
 			return nil, err
 		}
@@ -30,6 +42,7 @@ func (sDialer *vpnProtectedDialer) Dial(network, Address string) (net.Conn, erro
 		sDialer.vp.VpnSupportSet.Protect(fd)
 
 		sa := new(unix.SockaddrInet6)
+		spew.Dump(addr, sDialer.vp.prepareddomain.tcpprepared)
 		sa.Port = addr.Port
 		sa.ZoneId = uint32(zoneToInt(addr.Zone))
 		//fmt.Println(addr.IP.To16())
@@ -51,7 +64,17 @@ func (sDialer *vpnProtectedDialer) Dial(network, Address string) (net.Conn, erro
 
 	if strings.HasPrefix(network, "udp") {
 
-		addr, err := net.ResolveUDPAddr(network, Address)
+		var addr *net.UDPAddr
+		var err error
+
+		addr, haveaddr := sDialer.vp.prepareddomain.udpprepared[Address]
+
+		if haveaddr == false {
+			addr, err = net.ResolveUDPAddr(network, Address)
+		} else {
+			log.Println("Using Prepared Domain Name: UDP,", Address)
+		}
+
 		if err != nil {
 			return nil, err
 		}
@@ -115,13 +138,4 @@ func zoneToInt(zone string) int {
 	}
 	n, _, _ := dtoi(zone, 0)
 	return n
-}
-
-/*V2RayVPNServiceSupportsSet To support Android VPN mode*/
-type V2RayVPNServiceSupportsSet interface {
-	GetVPNFd() int
-	Setup(Conf string) int
-	Prepare() int
-	Shutdown() int
-	Protect(int) int
 }

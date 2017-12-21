@@ -1,16 +1,21 @@
 package libv2ray
 
+//go:generate make all
+
 import (
 	"fmt"
 
+	"github.com/xiaokangwang/AndroidLibV2ray/CoreI"
+
 	"v2ray.com/core"
+	_ "v2ray.com/core/main/distro/all"
 )
 
 /*CheckVersion int
 This func will return libv2ray binding version.
 */
 func CheckVersion() int {
-	return 20
+	return CoreI.CheckVersion()
 }
 
 /*CheckVersionX string

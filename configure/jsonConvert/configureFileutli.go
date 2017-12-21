@@ -1,16 +1,21 @@
-package libv2ray
+package jsonConvert
 
 import (
-	"io"
 	"os"
-	"strings"
 )
 
 type cfgtmpvars struct {
 	fd *os.File
 }
 
-func (v *V2RayPoint) parseCfg() io.Reader {
+/*
+func (v *jsonToPbConverter) parseCfg() io.Reader {
+	//Use Context if possible
+
+		if v.Context != nil {
+			v.ConfigureFile, _ = v.Context.ReadProp(configureFile)
+		}
+
 	if v.ConfigureFile == "V2Ray_internal/ConfigureFileContent" {
 		return strings.NewReader(v.ConfigureFileContent)
 	}
@@ -20,11 +25,15 @@ func (v *V2RayPoint) parseCfg() io.Reader {
 		v.Callbacks.OnEmitStatus(-1, "Failed to read config file ("+v.ConfigureFile+")")
 	}
 	v.cfgtmpvarsi.fd = fd
-	return fd
+	v2rayJsonWithComment := &v2rayJsonWithComment.Reader{Reader: fd}
+	return v2rayJsonWithComment
 }
-func (v *V2RayPoint) parseCfgDone() {
+
+/*
+func (v *jsonToPbConverter) parseCfgDone() {
 	if v.cfgtmpvarsi.fd != nil {
 		v.cfgtmpvarsi.fd.Close()
 	}
 
 }
+*/
